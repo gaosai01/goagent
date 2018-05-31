@@ -1,0 +1,21 @@
+
+
+appname: go-agent
+
+#etcdurl: http://172.17.0.2:2379
+etcdurl: etcd:2379
+# 0为Consumer，1为provider
+role: 1
+
+server:
+  dubbourl: 127.0.0.1:20880
+  maxdubboconncount: 256
+  maxserverconncount: 256
+  port: 20000
+  ratio: 1
+  dubboservices:
+  - argtypes: Ljava/lang/String;
+    hash: h
+    method: hash
+    name: com.alibaba.dubbo.performance.demo.provider.IHelloService
+    version: default

@@ -1,0 +1,12 @@
+
+
+appname: go-agent
+
+#etcdurl: http://172.17.0.2:2379
+etcdurl: http://etcd:2379
+# 0为Consumer，1为provider
+role: 0
+
+client:
+  maxconncount: 256
+  port: 20000
