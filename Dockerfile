@@ -6,10 +6,10 @@ FROM golang
 
 #  安装jdk8
 RUN mkdir /var/tmp/jdk
-RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  -P /var/tmp/jdk http://download.oracle.com/otn-pub/java/jdk/8u171-b11/512cd62ec5174c3487ac17c61aaa89e8/jdk-8u171-linux-x64.tar.gz
-RUN tar xzf /var/tmp/jdk/jdk-8u171-linux-x64.tar.gz -C /var/tmp/jdk && rm -rf /var/tmp/jdk/jdk-8u171-linux-x64.tar.gz
+RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  -P /var/tmp/jdk http://download.oracle.com/otn-pub/java/jdk/8u172-b11/a58eab1ec242421181065cdc37240b08/jdk-8u172-linux-x64.tar.gz
+RUN tar xzf /var/tmp/jdk/jdk-8u172-linux-x64.tar.gz -C /var/tmp/jdk && rm -rf /var/tmp/jdk/jdk-8u172-linux-x64.tar.gz
 #设置环境变量
-ENV JAVA_HOME /var/tmp/jdk/jdk1.8.0_171
+ENV JAVA_HOME /var/tmp/jdk/jdk1.8.0_172
 ENV PATH $PATH:$JAVA_HOME/bin
 
 
@@ -33,7 +33,7 @@ COPY start-agent.sh /usr/local/bin
 RUN set -ex \
  && chmod a+x /usr/local/bin/start-agent.sh \
  && mkdir -p /root/logs
-
+#git clone https://github.com/golang/net.git  C:/Users/mac/go/src/github.com/golang/net
 # golang.org/x/ 安装
 #RUN git clone https://github.com/golang/net.git $GOPATH/src/github.com/golang/net
 #RUN git clone https://github.com/golang/text.git $GOPATH/src/github.com/golang/text

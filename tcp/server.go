@@ -39,8 +39,8 @@ type TcpServer struct {
 	message            chan *Session
 	maxConn            int // 最大连接数
 	curConn            int // 当前连接数
-	closeMessageThread chan int
-	messageChan        chan *Session
+	//closeMessageThread chan int
+	//messageChan        chan *Session
 }
 
 func NewTcpServer(port int, msgHandler MessageHandler, pkgHandler PackageHandler,
@@ -52,8 +52,8 @@ func NewTcpServer(port int, msgHandler MessageHandler, pkgHandler PackageHandler
 	server.messageHandler = msgHandler
 	server.packageHandler = pkgHandler
 	server.message = make(chan *Session, maxConn)
-	server.closeMessageThread = make(chan int, maxConn)
-	server.messageChan = make(chan *Session, maxConn)
+	//server.closeMessageThread = make(chan int, maxConn)
+	//server.messageChan = make(chan *Session, maxConn)
 	return &server
 }
 
@@ -88,7 +88,7 @@ func (this *TcpServer) Start() {
 		})
 		session.server = this
 		go this.packageThread(&session) // 解包协程
-		go this.messageThread()         // 处理消息协程
+		//go this.messageThread()         // 处理消息协程
 		// 下一步开发计划
 		// 如果技术能力足够，需要查看fasthttp是怎么进行多路复用的，估计能提高性能
 	}
@@ -108,21 +108,23 @@ func (this *TcpServer) packageThread(session *Session) {
 			break
 		}
 		session.data = ans
-		this.messageChan <- session
+		//this.messageChan <- session
+		this.messageHandler.Handle(session)
+		this.packageHandler.Release(session.data)
 	}
 	time.Sleep(50 * time.Microsecond)
-	this.closeMessageThread <- 1
+	//this.closeMessageThread <- 1
 	this.curConn--
 }
 
-func (this *TcpServer) messageThread() {
-	for {
-		select {
-		case session := <-this.messageChan:
-			this.messageHandler.Handle(session)
-			this.packageHandler.Release(session.data)
-		case <-this.closeMessageThread:
-			return
-		}
-	}
-}
+//func (this *TcpServer) messageThread() {
+//	for {
+//		select {
+//		case session := <-this.messageChan:
+//			this.messageHandler.Handle(session)
+//			this.packageHandler.Release(session.data)
+//		case <-this.closeMessageThread:
+//			return
+//		}
+//	}
+//}
