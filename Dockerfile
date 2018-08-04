@@ -1,23 +1,10 @@
-# Builder container
-FROM registry.cn-hangzhou.aliyuncs.com/aliware2018/services AS builder
-
 # 官方来源, 该映像的$GOPATH值已被设置为/go
 FROM golang
-
-#  安装jdk8
-RUN mkdir /var/tmp/jdk
-RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  -P /var/tmp/jdk http://download.oracle.com/otn-pub/java/jdk/8u172-b11/a58eab1ec242421181065cdc37240b08/jdk-8u172-linux-x64.tar.gz
-RUN tar xzf /var/tmp/jdk/jdk-8u172-linux-x64.tar.gz -C /var/tmp/jdk && rm -rf /var/tmp/jdk/jdk-8u172-linux-x64.tar.gz
-#设置环境变量
-ENV JAVA_HOME /var/tmp/jdk/jdk1.8.0_172
-ENV PATH $PATH:$JAVA_HOME/bin
-
 
 # 安装etcd依赖
 RUN go get github.com/coreos/etcd/clientv3
 RUN go get gopkg.in/yaml.v2
 RUN go get github.com/valyala/fasthttp
-#RUN go get github.com/ivpusic/neo
 RUN mkdir -p /go/src/goagent
 
 # 复制 当前目录下内容 到容器中
@@ -29,26 +16,12 @@ COPY --from=builder /root/workspace/services/mesh-consumer/target/mesh-consumer-
 
 COPY start-agent.sh /usr/local/bin
 
-
 RUN set -ex \
  && chmod a+x /usr/local/bin/start-agent.sh \
  && mkdir -p /root/logs
-#git clone https://github.com/golang/net.git  C:/Users/mac/go/src/github.com/golang/net
-# golang.org/x/ 安装
-#RUN git clone https://github.com/golang/net.git $GOPATH/src/github.com/golang/net
-#RUN git clone https://github.com/golang/text.git $GOPATH/src/github.com/golang/text
-#RUN mkdir -p $GOPATH/src/golang.org/
-#RUN ln -sf $GOPATH/src/github.com/golang $GOPATH/src/golang.org/x
-#RUN go install text
-#RUN go get golang.org/x/net/http2
 
+RUN go build -o /go/src/goagent/run /go/src/goagent/main.go
 
-RUN go build -o /go/src/goagent/main /go/src/goagent/main.go
+RUN chmod a+x /go/src/goagent/run
 
-RUN chmod a+x /go/src/goagent/main
-
-
-# Expose the application on port 8087
-EXPOSE 8087
-
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["start-agent.sh"]

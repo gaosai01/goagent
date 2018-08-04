@@ -34,15 +34,13 @@ type AppConfig struct {
 	Client  AppClient
 }
 
-func (this *AppConfig) GetConfig(path string) {
+func (this *AppConfig) GetConfig(path string) error {
 	log.Debug("配置文件路径", path)
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Error("yamlFile.Get err ", err)
+		return err
 	}
 	log.Debug("配置信息", string(yamlFile))
 	err = yaml.Unmarshal(yamlFile, this)
-	if err != nil {
-		log.Error("Unmarshal Error", err)
-	}
+	return err
 }

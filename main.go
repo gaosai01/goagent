@@ -11,14 +11,21 @@ import (
 	"syscall"
 )
 
+const GoagentVersion = "1.0.test"
+
 func main() {
 	log.Init()
-
+	log.Info("启动goagent,版本:" + GoagentVersion)
 	// 读取配置文件
-	path := flag.String("config", "config/provider-l.yaml", "this is config file path")
+	path := flag.String("c", "/etc/linux/conf.yaml", "this is config file path")
 	flag.Parse()
 	appConfig := config.AppConfig{}
-	appConfig.GetConfig(*path)
+	err := appConfig.GetConfig(*path)
+	if err != nil {
+		log.Error("配置文件不存在", err)
+		return
+	}
+	// 打印配置信息
 	log.Info(appConfig)
 
 	// 注册中心
