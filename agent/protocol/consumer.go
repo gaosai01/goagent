@@ -7,6 +7,7 @@ import (
 	"bytes"
 )
 
+// consumer agent packageHandler类
 func NewAgentConsumerPackageHandler() tcp.PackageHandler {
 	headerPool := &sync.Pool{
 		New: func() interface{} {

@@ -1,28 +1,30 @@
 package pool
 
 import (
-	"fmt"
 	"sync"
 	"errors"
 )
 
-// Pool common connection pool
+// 一个链接吃
 type Pool struct {
-	// New create connection function
+	// 链接池中新建连接时会调用此方法
 	New func() interface{}
-	// Ping check connection is ok
+	// 判断连接池中的连接是否还有心跳的方法
 	Ping func(interface{}) bool
-	// Close close connection
-	Close  func(interface{})
-	store  chan interface{}
-	mu     sync.Mutex
+	// 关闭某个连接
+	Close func(interface{})
+	// 存储的连接的chan对象
+	store chan interface{}
+	// 锁
+	mu sync.Mutex
+	// 连接池的最大容量
 	maxCap int
 }
 
-// New create a pool with capacity
+// 新建连接池的方法
 func New(initCap, maxCap int, newFunc func() interface{}) (*Pool, error) {
 	if maxCap == 0 || initCap > maxCap {
-		return nil, fmt.Errorf("invalid capacity settings")
+		return nil, errors.New("不合法的initCap参数")
 	}
 	p := new(Pool)
 	p.store = make(chan interface{}, maxCap)
@@ -40,19 +42,20 @@ func New(initCap, maxCap int, newFunc func() interface{}) (*Pool, error) {
 	return p, nil
 }
 
-// Len returns current connections in pool
+// 获取连接池中连接数
 func (p *Pool) Len() int {
 	return len(p.store)
 }
 
-// Get returns a conn form store or create one
+// 从连接池中获取一个连接
 func (p *Pool) Get() (interface{}, error) {
 	if p.store == nil {
-		// pool aleardy destroyed, returns new connection
+		// 存储不存在，创建一个新连接
 		return p.create()
 	}
 	for {
 		select {
+		// 循环等待创建
 		case v := <-p.store:
 			if p.Ping != nil && p.Ping(v) == false {
 				p.Close(v)
@@ -65,7 +68,7 @@ func (p *Pool) Get() (interface{}, error) {
 	}
 }
 
-// Put set back conn into store again
+// 将连接放回连接池
 func (p *Pool) Put(v interface{}) {
 	if p.store == nil {
 		return
@@ -82,12 +85,12 @@ func (p *Pool) Put(v interface{}) {
 	}
 }
 
-// Destroy clear all connections
+// 销毁连接池
 func (p *Pool) Destroy() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.store == nil {
-		// pool aleardy destroyed
+		// 连接池已经销毁
 		return
 	}
 	close(p.store)
@@ -99,6 +102,7 @@ func (p *Pool) Destroy() {
 	p.store = nil
 }
 
+// 新建连接
 func (p *Pool) create() (interface{}, error) {
 	if p.store == nil {
 		p.mu.Lock()
@@ -108,11 +112,11 @@ func (p *Pool) create() (interface{}, error) {
 		p.mu.Unlock()
 	}
 	if p.New == nil {
-		return nil, fmt.Errorf("Pool.New is nil, can not create connection")
+		return nil, errors.New("pool.New方法不能为空")
 	}
 	ans := p.New()
 	if ans == nil {
-		return nil, errors.New("pool new err")
+		return nil, errors.New("新建连接失败")
 	}
 	return ans, nil
 }

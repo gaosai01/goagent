@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// agent之间通讯协议的对象
 const (
 	REQUEST   = iota
 	RESPONSE

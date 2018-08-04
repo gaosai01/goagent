@@ -8,6 +8,7 @@ import (
 	"github.com/Mr-GaoSai/goagent/tcp"
 )
 
+// dubbo协议的解析类，实现了PackageHandler
 const (
 	HEADER_LENGTH = 12 // 12 * 8 位
 	// magic header

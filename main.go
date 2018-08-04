@@ -6,16 +6,15 @@ import (
 	"flag"
 	"github.com/Mr-GaoSai/goagent/log"
 	"github.com/Mr-GaoSai/goagent/config"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	/*
-	1。 log
-	2。 使用异步client和server，chan阻塞
-	 */
 	log.Init()
 
-	// 配置文件
+	// 读取配置文件
 	path := flag.String("config", "config/provider-l.yaml", "this is config file path")
 	flag.Parse()
 	appConfig := config.AppConfig{}
@@ -27,7 +26,8 @@ func main() {
 
 	// 启动服务
 	if appConfig.Role == config.CONSUMER {
-		agent.NewClient(register, &appConfig)
+		// 这个方法是非阻塞的
+		agent.StartConsumerAgent(register, &appConfig)
 	} else {
 		// 向 etcd 中注册服务
 		ip := etcd.GetInternalIp()
@@ -38,8 +38,27 @@ func main() {
 		for _, v := range appConfig.Server.DubboServices {
 			register.Register(v, &host)
 		}
-		// 开启tcp服务器
-		agent.NewServer(register, &appConfig)
+		// 开启tcp服务器作为provider agent，非阻塞的
+		agent.StartProviderAgent(register, &appConfig)
 	}
 
+	initSignal()
+
+}
+
+func initSignal() {
+	signals := make(chan os.Signal, 1)
+	// It is not possible to block SIGKILL or syscall.SIGSTOP
+	signal.Notify(signals, os.Interrupt, os.Kill, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		sig := <-signals
+		log.Info("get signal %s", sig.String())
+		switch sig {
+		case syscall.SIGHUP:
+			// reload()
+		default:
+			log.Info("agent关闭")
+			return
+		}
+	}
 }

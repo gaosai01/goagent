@@ -7,10 +7,7 @@ import (
 	"time"
 	"github.com/Mr-GaoSai/goagent/log"
 	"context"
-	"bytes"
 	"strings"
-	"os"
-	"encoding/json"
 )
 
 // 有关etcd struct的配置
@@ -280,7 +277,7 @@ func (*EtcdRegistry) mkValue(service Service, host *Host) string {
 	return strconv.Itoa(host.Ratio)
 }
 
-// 外部获取实例方法
+// 获取Etcd注册中心实例方法
 func GetEtcdRegistry(appName string, etcd_urls []string) (*EtcdRegistry, error) {
 	register := EtcdRegistry{}
 	register.name = appName
@@ -299,31 +296,4 @@ func GetEtcdRegistry(appName string, etcd_urls []string) (*EtcdRegistry, error) 
 	return &register, nil
 }
 
-// 从json文件中读取service数组配置，然后注册
-func RegisterFromJsonFile(path string, register IRegister, ratio, port int) {
-	file, err := os.Open(path)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	var slice []Service
-	decoder.Decode(&slice)
-	ip := GetInternalIp()
-	log.Info("本机ip为：", ip)
-	host := Host{}
-	host.Url = CreateUrl(ip, port)
-	host.Ratio = ratio
-	for _, service := range slice {
-		register.Register(service, &host)
-	}
-}
 
-func CreateUrl(ip string, port int) string {
-	var buf bytes.Buffer
-	buf.WriteString(ip)
-	buf.WriteString(":")
-	buf.WriteString(strconv.Itoa(port))
-	return buf.String()
-}

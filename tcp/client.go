@@ -8,6 +8,7 @@ import (
 	"bufio"
 )
 
+// tcp链接的对象，可以通过TcpPool对象生成
 type TcpClient struct {
 	conn           net.Conn       // 连接
 	ut             time.Time      // 最近一次使用时间,用于定时关闭
@@ -16,6 +17,50 @@ type TcpClient struct {
 	url            string
 }
 
+// 和tcp连接有关的写操作
+func (this *TcpClient) Write(v interface{}) error {
+	// 写入对象,调用 编码的方式
+	// 最好的方式为边解码边写入连接池，经过测试并不是这样，边解压边写入的方式会增大网络曾压力，多个小包传输数据，时间更长
+	err := this.packageHandler.Pack(v, this.conn)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 和tcp链接相关的读操作
+func (this *TcpClient) Read() (interface{}, error) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Error("tcp Read panic", p)
+		}
+	}()
+	if !this.scanner.Scan() {
+		return nil, this.scanner.Err()
+	}
+	ans, err := this.packageHandler.UnPack(this.scanner.Bytes())
+	if err != nil {
+		return ans, err
+	}
+	return ans, nil
+}
+
+// 和tcp链接有关的read出来的对象的释放操作
+func (this *TcpClient) Release(v interface{}) {
+	this.packageHandler.Release(v)
+}
+
+// tcp链接关闭
+func (this *TcpClient) Close() {
+	this.conn.Close()
+}
+
+// 获取tcp链接的远程地址信息
+func (this *TcpClient) Url() string {
+	return this.url
+}
+
+// tcp链接池
 type TcpPool struct {
 	pool *pool.Pool
 	url  string
@@ -65,6 +110,7 @@ func NewTcpPool(url string, num int, duration time.Duration, handler PackageHand
 	return &tp, nil
 }
 
+// 获取TcpClient对象
 func (this *TcpPool) Get() (*TcpClient, error) {
 	client, err := this.pool.Get()
 	if err != nil {
@@ -75,10 +121,12 @@ func (this *TcpPool) Get() (*TcpClient, error) {
 	return tc, nil
 }
 
+// 获取tcp池的远程地址
 func (this *TcpPool) Url() string {
 	return this.url
 }
 
+// 将tcpClient对象放回池子
 func (this *TcpPool) Put(tc *TcpClient) {
 	if tc == nil {
 		return
@@ -86,45 +134,7 @@ func (this *TcpPool) Put(tc *TcpClient) {
 	this.pool.Put(tc)
 }
 
+// tcp链接池关闭
 func (this *TcpPool) Close() {
 	this.pool.Destroy()
-}
-
-// 和tcp连接有关的读写操作
-func (this *TcpClient) Write(v interface{}) error {
-	// 写入对象,调用 编码的方式
-	// 最好的方式为边解码边写入连接池，经过测试并不是这样，边解压边写入的方式会增大网络曾压力，多个小包传输数据，时间更长
-	err := this.packageHandler.Pack(v, this.conn)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (this *TcpClient) Read() (interface{}, error) {
-	defer func() {
-		if p := recover(); p != nil {
-			log.Error("tcp Read panic", p)
-		}
-	}()
-	if !this.scanner.Scan() {
-		return nil, this.scanner.Err()
-	}
-	ans, err := this.packageHandler.UnPack(this.scanner.Bytes())
-	if err != nil {
-		return ans, err
-	}
-	return ans, nil
-}
-
-func (this *TcpClient) Release(v interface{}) {
-	this.packageHandler.Release(v)
-}
-
-func (this *TcpClient) Close() {
-	this.conn.Close()
-}
-
-func (this *TcpClient) Url() string {
-	return this.url
 }

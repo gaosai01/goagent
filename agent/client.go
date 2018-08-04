@@ -20,7 +20,7 @@ var tcpPoolMap map[string]*tcp.TcpPool
 var mu sync.RWMutex
 var pkgHandler tcp.PackageHandler
 
-func NewClient(r etcd.IRegister, ac *config.AppConfig) {
+func StartConsumerAgent(r etcd.IRegister, ac *config.AppConfig) {
 	register = r
 	appConfig = ac
 	tcpPoolMap = make(map[string]*tcp.TcpPool)
@@ -31,34 +31,25 @@ func NewClient(r etcd.IRegister, ac *config.AppConfig) {
 	var buf bytes.Buffer
 	buf.WriteString(":")
 	buf.WriteString(strconv.Itoa(appConfig.Client.Port))
-	log.Info("start consumer-agent，port:", appConfig.Client.Port)
-
-	err := fasthttp.ListenAndServe(buf.String(), callAgent)
-	if err != nil {
-		log.Error("启动http服务器error", err)
-	}
+	log.Info("consumerAgent开启，监听port:", appConfig.Client.Port)
+	// 开启http服务器
+	go func() {
+		err := fasthttp.ListenAndServe(buf.String(), callAgent)
+		if err != nil {
+			log.Error("启动http服务器error", err)
+		}
+	}()
 }
 
-//var pingjun float64 = 0
-//var num float64 = 0.0
-//var nummu sync.Mutex
+// http request上传3个字段，interface，method，parameter字段
 func callAgent(ctx *fasthttp.RequestCtx) {
-	//start_time := time.Now().UnixNano() / 100000
-	//defer func() {
-	//	end_time := time.Now().UnixNano() / 100000
-	//	cha_time := end_time - start_time
-	//	log.Info("此次访问时间:", cha_time)
-	//	nummu.Lock()
-	//	pingjun = pingjun*num + float64(cha_time)
-	//	num += 1
-	//	pingjun = pingjun / num
-	//	nummu.Unlock()
-	//	log.Info("平均访问时间:", pingjun)
-	//}()
 	req := ctx.Request.PostArgs()
+	// 获取http request的interface字段
 	iface := string(req.Peek("interface"))
+	// 获取http request的method字段
 	method := string(req.Peek("method"))
 	parameterTypesString := string(req.Peek("parameterTypesString"))
+	// 获取http request的paramter字段
 	parameter := string(req.Peek("parameter"))
 	host, hash := register.Find(iface, "default", method, parameterTypesString)
 	if host == nil {
@@ -66,8 +57,6 @@ func callAgent(ctx *fasthttp.RequestCtx) {
 		fmt.Fprintln(ctx, "Error")
 		return
 	}
-	//log.Debug("parameter", parameter)
-	//log.Debug(*host)
 	// 创建agent传输对象
 	agentReq := protocol.NewAgentRequest(hash, parameter)
 	// 创建与agent的连接
@@ -131,12 +120,14 @@ func getTcpClient(host *etcd.Host) (*tcp.TcpClient, error) {
 		if !ok {
 			var err error
 			//url string, num int, duration time.Duration, handler PackageHandler
+			// 穿件tcp连接池，和每一个远程服务器都有一个连接
 			pool, err = tcp.NewTcpPool(host.Url, appConfig.Client.MaxConnCount*host.Ratio, 30*time.Second, pkgHandler)
 			if err != nil {
 				log.Error("tcp pool create", err)
 				mu.Unlock()
 				return nil, err
 			}
+			// 连接池存储到字典里面
 			tcpPoolMap[host.Url] = pool
 		}
 		mu.Unlock()
@@ -145,7 +136,7 @@ func getTcpClient(host *etcd.Host) (*tcp.TcpClient, error) {
 }
 
 /*
-由于先调用的get，然后put，所以不许要锁
+由于先调用的get，然后put，所以不需要锁
  */
 func putTcpClient(client *tcp.TcpClient) {
 	pool, ok := tcpPoolMap[client.Url()]

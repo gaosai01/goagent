@@ -88,7 +88,7 @@ func (this *TcpServer) Start() {
 		})
 		session.server = this
 		go this.packageThread(&session) // 解包协程
-		//go this.messageThread()         // 处理消息协程
+		//go this.messageThread()         // 处理消息协程, 这里打算开启两个协程处理数据，一个connection的读和写的，但是效率并没有提升
 		// 下一步开发计划
 		// 如果技术能力足够，需要查看fasthttp是怎么进行多路复用的，估计能提高性能
 	}
@@ -100,7 +100,7 @@ func (this *TcpServer) StartAsync() {
 
 func (this *TcpServer) packageThread(session *Session) {
 	// 打印接收到的数据包
-	defer session.conn.Close()
+	defer session.Close()
 	for session.scanner.Scan() {
 		ans, err := this.packageHandler.UnPack(session.scanner.Bytes())
 		if err != nil {

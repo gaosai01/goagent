@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// provider agent的messageHandler
 func NewAgentMessageHandler(dubboUrl string, maxConn int, etcd registry.IRegister) tcp.MessageHandler {
 	handler := AgentMessageHandler{}
 	handler.etcd = etcd
