@@ -2,4 +2,4 @@
 
 git add .
 git commit -m "6000"
-git push origin master
+git push -f origin master
