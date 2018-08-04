@@ -25,4 +25,50 @@ Apache Dubbo (Incubating) 是阿里中间件团队贡献给 Apache 社区的第�
 5. agent是协议转化包，内部有dubbo的协议转化，和agent间的协议
 
 
-### 项目如何使用
+### consumer-agent配置文件解释
+```yaml
+appname: go-agent
+#etcdurl: http://172.17.0.2:2379
+etcdurl: http://etcd:2379
+# 0为Consumer，1为provider
+role: 0
+# consumer-agent的配置
+client:
+# 与agent间的最大连接数
+  maxconncount: 256
+# http监听的端口
+  port: 20000
+```
+
+### provider-agent配置文件解释
+```yaml
+appname: go-agent
+# etcd的配置
+etcdurl: http://localhost:2379
+# 0为Consumer，1为provider
+role: 1
+# provider-agent的配置
+server:
+# dubboUrl的地址
+  dubbourl: 127.0.0.1:20880
+# 与dubbo之间的连接数
+  maxdubboconncount: 768
+# server的tcp最大连接数
+  maxserverconncount: 768
+# server的tcp监听端口
+  port: 20000
+# server的权重
+  ratio: 3
+# dubbo的server,注册到etcd中
+  dubboservices:
+  - argtypes: Ljava/lang/String;
+    hash: h
+    method: hash
+    name: com.alibaba.dubbo.performance.demo.provider.IHelloService
+    version: default
+```
+
+### server.dubboservices.hash配置含义
+在agent之间传输数据每次传输时都要传输method和name和argtypes这些数据，
+provider-agent本身就知道hash对应的service，网络传输如此多的数据是多余的，因此采用hash机制简化网络传输数据量
+

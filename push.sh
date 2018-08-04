@@ -5,5 +5,5 @@
 #go build -o dist/macos
 # 上传到git仓库
 git add .
-git commit -m "优化配置管理部分和docker"
+git commit -m "优化文档"
 git push -f origin master
