@@ -1,10 +1,10 @@
 package agent
 
 import (
-	"goagent/tcp"
-	"goagent/agent/protocol"
-	etcd "goagent/registry"
-	"goagent/config"
+	"github.com/Mr-GaoSai/goagent/tcp"
+	"github.com/Mr-GaoSai/goagent/agent/protocol"
+	etcd "github.com/Mr-GaoSai/goagent/registry"
+	"github.com/Mr-GaoSai/goagent/config"
 )
 
 func NewServer(register etcd.IRegister, appConfig *config.AppConfig) {

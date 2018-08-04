@@ -1,8 +1,8 @@
 package registry_test
 
 import (
-	etcd "goagent/registry"
-	"goagent/log"
+	etcd "github.com/Mr-GaoSai/goagent/registry"
+	"github.com/Mr-GaoSai/goagent/log"
 	"testing"
 )
 

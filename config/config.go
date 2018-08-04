@@ -1,9 +1,9 @@
 package config
 
 import (
-	"goagent/registry"
+	"github.com/Mr-GaoSai/goagent/registry"
 	"io/ioutil"
-	"goagent/log"
+	"github.com/Mr-GaoSai/goagent/log"
 	"gopkg.in/yaml.v2"
 )
 

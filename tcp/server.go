@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"net"
 	"bytes"
-	"goagent/log"
+	"github.com/Mr-GaoSai/goagent/log"
 	"bufio"
 	"time"
 )
@@ -33,12 +33,12 @@ func (this *Session) Write(iface interface{}) error {
 
 // tcp server
 type TcpServer struct {
-	port               int
-	messageHandler     MessageHandler
-	packageHandler     PackageHandler
-	message            chan *Session
-	maxConn            int // 最大连接数
-	curConn            int // 当前连接数
+	port           int
+	messageHandler MessageHandler
+	packageHandler PackageHandler
+	message        chan *Session
+	maxConn        int // 最大连接数
+	curConn        int // 当前连接数
 	//closeMessageThread chan int
 	//messageChan        chan *Session
 }

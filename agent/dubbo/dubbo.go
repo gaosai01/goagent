@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"sync"
-	"goagent/tcp"
+	"github.com/Mr-GaoSai/goagent/tcp"
 )
 
 const (

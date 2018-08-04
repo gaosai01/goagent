@@ -1,10 +1,10 @@
 package protocol
 
 import (
-	"goagent/tcp"
-	"goagent/registry"
-	"goagent/log"
-	"goagent/agent/dubbo"
+	"github.com/Mr-GaoSai/goagent/tcp"
+	"github.com/Mr-GaoSai/goagent/registry"
+	"github.com/Mr-GaoSai/goagent/log"
+	"github.com/Mr-GaoSai/goagent/agent/dubbo"
 	"time"
 )
 

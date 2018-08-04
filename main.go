@@ -1,14 +1,12 @@
 package main
 
 import (
-	"goagent/agent"
-	etcd "goagent/registry"
+	"github.com/Mr-GaoSai/goagent/agent"
+	etcd "github.com/Mr-GaoSai/goagent/registry"
 	"flag"
-	"goagent/log"
-	"goagent/config"
+	"github.com/Mr-GaoSai/goagent/log"
+	"github.com/Mr-GaoSai/goagent/config"
 )
-
-
 
 func main() {
 	/*

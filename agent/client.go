@@ -1,13 +1,13 @@
 package agent
 
 import (
-	"goagent/agent/protocol"
-	"goagent/tcp"
-	"goagent/log"
+	"github.com/Mr-GaoSai/goagent/agent/protocol"
+	"github.com/Mr-GaoSai/goagent/tcp"
+	"github.com/Mr-GaoSai/goagent/log"
 	"bytes"
 	"strconv"
-	etcd "goagent/registry"
-	"goagent/config"
+	etcd "github.com/Mr-GaoSai/goagent/registry"
+	"github.com/Mr-GaoSai/goagent/config"
 	"sync"
 	"fmt"
 	"time"

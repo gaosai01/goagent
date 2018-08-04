@@ -3,7 +3,7 @@ package protocol
 import (
 	"io"
 	"sync"
-	"goagent/tcp"
+	"github.com/Mr-GaoSai/goagent/tcp"
 	"bytes"
 )
 

@@ -3,8 +3,8 @@ package tcp
 import (
 	"net"
 	"time"
-	"goagent/pool"
-	"goagent/log"
+	"github.com/Mr-GaoSai/goagent/pool"
+	"github.com/Mr-GaoSai/goagent/log"
 	"bufio"
 )
 

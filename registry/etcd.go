@@ -5,7 +5,7 @@ import (
 	"sync"
 	"strconv"
 	"time"
-	"goagent/log"
+	"github.com/Mr-GaoSai/goagent/log"
 	"context"
 	"bytes"
 	"strings"
